@@ -1,48 +1,75 @@
-﻿using CheeseMVC.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
+using CheeseMVC.Data;
+using CheeseMVC.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CheeseMVC.ViewModels
 {
     public class AddCheeseViewModel
     {
+        //
+        // model binding properties
+        //
+
+        // ProhibitedCheeseValidatorAttribute.cs
+        [ProhibitedCheeseValidator(new[] { "provel" })]
         [Required]
         [Display(Name = "Cheese Name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
-        [Required(ErrorMessage = "You must give your cheese a description")]
-        public string Description { get; set; }
+        [Required(ErrorMessage = "Describe your cheese, sir!")]
+        public string Description { get; set; } = "";
 
-        public CheeseType Type { get; set; }
+        [Display(Name = "Cheese Category")]
+        public int SelectedCheeseCategoryID { get; set; }
 
-        public List<SelectListItem> CheeseTypes { get; set; }
+        public List<SelectListItem> CheeseCategories { get; set; }
 
-        public AddCheeseViewModel() {
+        [Range(1, 5)]
+        public int Rating { get; set; } = 5;
 
-            CheeseTypes = new List<SelectListItem>();
+        // OdorValidatorAttribute.cs
+        [OdorValidator]
+        [Required]
+        public string Odor { get; set; }
 
-            // <option value="0">Hard</option>
-            CheeseTypes.Add(new SelectListItem {
-                Value = ((int) CheeseType.Hard).ToString(),
-                Text = CheeseType.Hard.ToString()
-            });
+        // CheeseAgeValidator.cs
+        [CustomValidation(typeof(CheeseAgeValidator), "IsValidAge")]
+        public int Age { get; set; }
 
-            CheeseTypes.Add(new SelectListItem
+        public Cheese CreateCheese(IList<CheeseCategory> categories)
+        {
+            return new Cheese()
             {
-                Value = ((int)CheeseType.Soft).ToString(),
-                Text = CheeseType.Soft.ToString()
-            });
+                Name = Name,
+                Description = Description,
+                Rating = Rating,
+                Odor = Odor,
+                Age = Age,
+                Category = categories.Single(c => c.ID == SelectedCheeseCategoryID)
+            };
 
-            CheeseTypes.Add(new SelectListItem
+        }
+
+        public AddCheeseViewModel()
+        {
+            CheeseCategories = new List<SelectListItem>();
+        }
+
+        public AddCheeseViewModel(List<CheeseCategory> categories) : this()
+        {
+            foreach (CheeseCategory category in categories)
             {
-                Value = ((int)CheeseType.Fake).ToString(),
-                Text = CheeseType.Fake.ToString()
-            });
-
+                // <option value="ID">Name</option>
+                CheeseCategories.Add(new SelectListItem()
+                {
+                    Value = category.ID.ToString(),
+                    Text = category.Name
+                });
+            }
         }
     }
 }

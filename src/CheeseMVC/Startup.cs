@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CheeseMVC.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using CheeseMVC.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace CheeseMVC
 {
@@ -21,6 +21,12 @@ namespace CheeseMVC
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
+            if (env.IsDevelopment())
+            {
+                // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
+                builder.AddApplicationInsightsSettings(developerMode: true);
+            }
             Configuration = builder.Build();
         }
 
@@ -29,19 +35,25 @@ namespace CheeseMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add framework services.
+            services.AddApplicationInsightsTelemetry(Configuration);
 
             services.AddDbContext<CheeseDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+            );
 
-            // Add framework services.
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, CheeseDbContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+#pragma warning disable CS0612 // Type or member is obsolete
+            app.UseApplicationInsightsRequestTelemetry();
+#pragma warning restore CS0612 // Type or member is obsolete
 
             if (env.IsDevelopment())
             {
@@ -53,6 +65,10 @@ namespace CheeseMVC
                 app.UseExceptionHandler("/Home/Error");
             }
 
+#pragma warning disable CS0612 // Type or member is obsolete
+            app.UseApplicationInsightsExceptionTelemetry();
+#pragma warning restore CS0612 // Type or member is obsolete
+
             app.UseStaticFiles();
 
             app.UseMvc(routes =>
@@ -61,7 +77,6 @@ namespace CheeseMVC
                     name: "default",
                     template: "{controller=Cheese}/{action=Index}/{id?}");
             });
-            context.Database.EnsureCreated();
         }
     }
 }
