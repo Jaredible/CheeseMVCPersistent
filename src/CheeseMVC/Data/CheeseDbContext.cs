@@ -10,6 +10,7 @@ namespace CheeseMVC.Data
         public DbSet<Menu> Menus { get; set; }
         public DbSet<CheeseMenu> CheeseMenus { get; set; }
         
+        // Test
         public CheeseDbContext(DbContextOptions<CheeseDbContext> options)
             : base(options)
         {
