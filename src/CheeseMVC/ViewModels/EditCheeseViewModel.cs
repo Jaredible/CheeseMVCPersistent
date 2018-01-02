@@ -7,6 +7,10 @@ namespace CheeseMVC.ViewModels
     {
         public int CheeseId { get; set; }
 
+        public EditCheeseViewModel()
+        {
+        }
+
         public EditCheeseViewModel(Cheese cheese, List<CheeseCategory> categories) : base(categories)
         {
             CheeseId = cheese.ID;

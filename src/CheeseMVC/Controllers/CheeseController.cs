@@ -38,9 +38,7 @@ namespace CheeseMVC.Controllers
 
         public IActionResult Add()
         {
-            AddCheeseViewModel viewModel = new AddCheeseViewModel(
-                context.Categories.ToList()
-            );
+            AddCheeseViewModel viewModel = new AddCheeseViewModel(context.Categories.ToList());
 
             // /Views/Cheese/Add.cshtml
             return View(viewModel);
@@ -115,10 +113,7 @@ namespace CheeseMVC.Controllers
         public IActionResult Edit(int cheeseId)
         {
             Cheese cheese = context.Cheeses.Single(c => c.ID == cheeseId);
-            EditCheeseViewModel viewModel = new EditCheeseViewModel(
-                cheese,
-                context.Categories.ToList()
-            );
+            EditCheeseViewModel viewModel = new EditCheeseViewModel(cheese, context.Categories.ToList());
             return View(viewModel);
         }
 
