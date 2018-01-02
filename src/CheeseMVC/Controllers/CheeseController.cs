@@ -166,9 +166,7 @@ namespace CheeseMVC.Controllers
                 return Redirect("/category");
             }
 
-            CheeseCategory theCategory = context.Categories
-                .Include(c => c.Cheeses)
-                .Single(c => c.ID == categoryID);
+            CheeseCategory theCategory = context.Categories.Include(c => c.Cheeses).Single(c => c.ID == categoryID);
 
             return View(theCategory);
         }
